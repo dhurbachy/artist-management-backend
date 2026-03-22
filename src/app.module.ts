@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './core/database/database.module';  
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
 
 import * as path from 'path';
 
@@ -12,7 +13,8 @@ import * as path from 'path';
       isGlobal:    true,
       envFilePath: path.join(process.cwd(), '.env'), 
     }),
-    DatabaseModule,  
+    DatabaseModule,
+    AuthModule,  
     
   ],
   controllers: [AppController],
