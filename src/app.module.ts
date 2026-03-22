@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './core/database/database.module';  
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { ArtistModule } from './artist/artist.module';
 
 import * as path from 'path';
 
@@ -14,7 +15,8 @@ import * as path from 'path';
       envFilePath: path.join(process.cwd(), '.env'), 
     }),
     DatabaseModule,
-    AuthModule,  
+    AuthModule,
+    ArtistModule,  
     
   ],
   controllers: [AppController],
