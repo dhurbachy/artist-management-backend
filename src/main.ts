@@ -1,8 +1,7 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 dotenv.config({ path: path.join(process.cwd(), '.env') });
-import * as cookieParser from 'cookie-parser';
-
+const cookieParser = require('cookie-parser');
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';

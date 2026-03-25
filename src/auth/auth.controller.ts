@@ -67,16 +67,30 @@ async logout(
 }
 
   @Post('refresh')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard('jwt-refresh'))
-  refresh(@CurrentUser() user: any) {
-    return this.authService.refreshTokens(
-      user.sub,
-      user.email,
-      user.role,
-      user.refreshToken,
+@HttpCode(HttpStatus.OK)
+@UseGuards(AuthGuard('jwt-refresh'))
+async refresh(
+    @CurrentUser() user: any,
+    @Res({ passthrough: true }) res: Response,
+) {
+    const tokens = await this.authService.refreshTokens(
+        user.sub,
+        user.email,
+        user.role,
+        user.refreshToken,
     );
-  }
+
+    // ✅ Rotate refresh_token cookie
+    res.cookie('refresh_token', tokens.refresh_token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    // ✅ Only return NEW access_token
+    return { access_token: tokens.access_token };
+}
 
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
