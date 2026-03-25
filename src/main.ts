@@ -1,31 +1,32 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 dotenv.config({ path: path.join(process.cwd(), '.env') });
+import * as cookieParser from 'cookie-parser';
 
-import { NestFactory }            from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { AppModule }              from './app.module';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   try {
-    const app    = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule);
     const logger = new Logger('Bootstrap');
-
-app.enableCors({
-    origin: "http://localhost:5173", 
-    credentials: true,               
-    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-});
+    app.use(cookieParser());
+    app.enableCors({
+      origin: "http://localhost:5173",
+      credentials: true,
+      methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    });
     app.setGlobalPrefix('api', {
       exclude: ['docs', 'docs-json'],
     });
 
     app.useGlobalPipes(new ValidationPipe({
-      whitelist:            true,
+      whitelist: true,
       forbidNonWhitelisted: true,
-      transform:            true,
+      transform: true,
     }));
 
     // Swagger 
@@ -35,11 +36,11 @@ app.enableCors({
       .setVersion('1.0')
       .addBearerAuth(
         {
-          type:         'http',
-          scheme:       'bearer',
+          type: 'http',
+          scheme: 'bearer',
           bearerFormat: 'JWT',
-          name:         'Authorization',
-          in:           'header',
+          name: 'Authorization',
+          in: 'header',
         },
         'access-token',
       )

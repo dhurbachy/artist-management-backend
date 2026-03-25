@@ -1,7 +1,9 @@
 import {
   Controller, Post, Get, Body,
-  UseGuards, HttpCode, HttpStatus,
+  UseGuards, HttpCode, HttpStatus,Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
+
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -21,18 +23,48 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
-  @Post('login')
-  @HttpCode(HttpStatus.OK)
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
-  }
+@Post('login')
+@HttpCode(HttpStatus.OK)
+async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,  // ✅ passthrough keeps NestJS response handling
+) {
+    const result = await this.authService.login(dto);
 
-  @Post('logout')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard('jwt'))
-  logout(@CurrentUser('id') userId: string) {
-    return this.authService.logout(userId);
-  }
+    // ✅ Set refresh_token as httpOnly cookie
+    res.cookie('refresh_token', result.refresh_token, {
+        httpOnly: true,
+        secure: false,       // false for localhost, true in production
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    // ✅ Only return access_token — never expose refresh_token to JS
+    return {
+        message: result.message,
+        user: result.user,
+        access_token: result.access_token,
+    };
+}
+
+@Post('logout')
+@HttpCode(HttpStatus.OK)
+@UseGuards(AuthGuard('jwt'))
+async logout(
+    @CurrentUser('id') userId: string,
+    @Res({ passthrough: true }) res: Response,
+) {
+    await this.authService.logout(userId);
+
+    // ✅ Clear the cookie
+    res.clearCookie('refresh_token', {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+    });
+
+    return { message: 'Logged out successfully' };
+}
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
