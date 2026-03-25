@@ -90,7 +90,7 @@ async createUser(data: Partial<User>): Promise<Omit<User, 'password' | 'refresh_
     data.role    ?? 'artist',
   ]);
 
-  if (!result) throw new InternalServerErrorException('User creation failed');  // ← fix
+  if (!result) throw new InternalServerErrorException('User creation failed'); 
   return result;
 }
 
