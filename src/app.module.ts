@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { ArtistModule } from './artist/artist.module';
 import { SongsModule } from './songs/songs.module';
+import { UserModule } from './user/user.module';
 
 import * as path from 'path';
 
@@ -18,7 +19,8 @@ import * as path from 'path';
     DatabaseModule,
     AuthModule,
     ArtistModule,
-    SongsModule,  
+    SongsModule,
+    UserModule,  
     
   ],
   controllers: [AppController],
