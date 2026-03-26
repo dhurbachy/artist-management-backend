@@ -65,10 +65,22 @@ export class ArtistService {
     const artists: any[] = [];
     const errors: string[] = [];
 
+    const REQUIRED_HEADERS = ['name', 'dob', 'gender', 'address', 'first_release_year', 'no_of_albums_released'];
+
     await new Promise<void>((resolve, reject) => {
       const stream = Readable.from(fileBuffer);
       stream
-        .pipe(csvParser({ headers: true, strict: true })) // Use the default import here
+        .pipe(csvParser({
+          strict: false,                                              // don't throw on column count mismatch
+          mapHeaders: ({ header }) => header.trim().replace(/^\uFEFF/, '').replace(/^"|"$/g, ''), // strip BOM + quotes
+          mapValues: ({ value }) => value?.trim().replace(/^"|"$/g, '') ?? '',                    // strip quotes from values
+        }))
+        .on('headers', (foundHeaders: string[]) => {
+          const missing = REQUIRED_HEADERS.filter(h => !foundHeaders.includes(h));
+          if (missing.length > 0) {
+            reject(new BadRequestException(`CSV is missing required headers: ${missing.join(', ')}`));
+          }
+        })
         .on('data', (row: any) => {
           if (!row.name) {
             errors.push(`Skipped row — missing name: ${JSON.stringify(row)}`);
