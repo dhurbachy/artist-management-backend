@@ -1,7 +1,8 @@
 import {
   IsString, IsOptional, IsEnum,
-  IsDateString, IsInt, Min, IsUUID,
+  IsDateString, IsInt, Min, IsUUID, IsNotEmpty
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum GenderType {
@@ -14,10 +15,13 @@ export class CreateArtistDto {
   @ApiPropertyOptional({ example: '550e8400-e29b-41d4-a716-446655440000' })
   @IsOptional()
   @IsUUID()
+  @Transform(({ value }) => value.trim())
   user_id?: string;
 
   @ApiProperty({ example: 'The Beatles' })
   @IsString()
+  @Transform(({ value }) => value.trim())
+  @IsNotEmpty()
   name: string;
 
   @ApiPropertyOptional({ example: '1960-01-01' })
@@ -33,6 +37,8 @@ export class CreateArtistDto {
   @ApiPropertyOptional({ example: 'Liverpool, UK' })
   @IsOptional()
   @IsString()
+  @IsNotEmpty() 
+  @Transform(({ value }) => value?.trim())
   address?: string;
 
   @ApiPropertyOptional({ example: 1962, minimum: 1900 })
