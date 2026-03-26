@@ -1,6 +1,6 @@
-import { IsString, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsEnum,IsNotEmpty  } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-
+import { Transform } from 'class-transformer';
 export enum GenreType {
   RNB     = 'rnb',
   COUNTRY = 'country',
@@ -12,11 +12,15 @@ export enum GenreType {
 export class CreateSongDto {
   @ApiProperty({ example: 'Hey Jude' })
   @IsString()
+   @IsNotEmpty() 
+   @Transform(({value})=>value.trim())
   title: string;
 
   @ApiPropertyOptional({ example: 'Hey Jude Album' })
   @IsOptional()
   @IsString()
+  @IsNotEmpty()
+  @Transform(({value})=>value.trim())
   album_name?: string;
 
   @ApiPropertyOptional({ enum: GenreType, example: GenreType.ROCK })
