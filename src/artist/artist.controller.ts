@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
@@ -18,6 +18,18 @@ import { Roles } from '../shared/decorators/roles.decorator';
 export class ArtistController {
   constructor(private readonly artistService: ArtistService) { }
 
+   @Get('export-csv')
+  @Roles('artist_manager')
+  async exportCsv(@Res() res: Response) {
+    const csv = await this.artistService.exportCsv();
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="artists_${Date.now()}.csv"`,
+    );
+    res.send(csv);
+  }
   @Post()
   @Roles('artist_manager')
   create(@Body() createArtistDto: CreateArtistDto) {
@@ -67,16 +79,5 @@ export class ArtistController {
   importCsv(@UploadedFile() file: Express.Multer.File) {
     return this.artistService.importCsv(file.buffer);
   }
-  // @Get('export-csv')
-  // @Roles('artist_manager')
-  // async exportCsv(@Res() res: Response) {
-  //   const csv = await this.artistService.exportCsv();
-
-  //   res.setHeader('Content-Type', 'text/csv');
-  //   res.setHeader(
-  //     'Content-Disposition',
-  //     `attachment; filename="artists_${Date.now()}.csv"`,
-  //   );
-  //   res.send(csv);
-  // }
+ 
 }
