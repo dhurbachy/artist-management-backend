@@ -14,15 +14,15 @@ import csvParser from 'csv-parser';
 export class ArtistService {
   constructor(private readonly artistsRepo: ArtistsRepository) { }
   async create(createArtistDto: CreateArtistDto) {
-    return this.artistsRepo.createArtist(createArtistDto);
+    return await this.artistsRepo.createArtist(createArtistDto);
   }
 
   async findAll(page: number, limit: number) {
-    return this.artistsRepo.findAllPaginated(page, limit);
+    return await this.artistsRepo.findAllPaginated(page, limit);
   }
 
   async findOne(id: string) {
-    const artist = this.artistsRepo.findArtistById(id);
+    const artist = await this.artistsRepo.findArtistById(id);
     if (!artist) throw new NotFoundException(`Artist ${id} Not Found`);
     return artist;
 
@@ -37,7 +37,7 @@ export class ArtistService {
 
   async remove(id: string) {
     await this.findOne(id);
-    return this.artistsRepo.deleteArtist(id);
+    return await this.artistsRepo.deleteArtist(id);
   }
 
   async exportCsv(): Promise<string> {
