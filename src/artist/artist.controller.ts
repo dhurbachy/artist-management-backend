@@ -13,13 +13,15 @@ import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { RolesGuard } from '../shared/guards/roles.guard';
 import { Roles } from '../shared/decorators/roles.decorator';
+import { ApiConsumes, ApiBody } from '@nestjs/swagger';
 
 @Controller('artist')
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class ArtistController {
   constructor(private readonly artistService: ArtistService) { }
 
    @Get('export-csv')
-  @Roles('artist_manager')
+  @Roles('super_admin', 'artist_manager')
   async exportCsv(@Res() res: Response) {
     const csv = await this.artistService.exportCsv();
 
@@ -30,6 +32,35 @@ export class ArtistController {
     );
     res.send(csv);
   }
+
+@Post('import-csv')
+  @Roles('super_admin', 'artist_manager')
+@ApiConsumes('multipart/form-data')
+@ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      file: {
+        type: 'string',
+        format: 'binary',
+      },
+    },
+  },
+})
+@UseInterceptors(FileInterceptor('file', {
+  fileFilter: (_, file, cb) => {
+    if (!file.originalname.match(/\.csv$/)) {
+      return cb(new Error('Only CSV files are allowed'), false);
+    }
+    cb(null, true);
+  },
+  limits: { fileSize: 5 * 1024 * 1024 },
+}))
+importCsv(@UploadedFile() file: Express.Multer.File) {
+  return this.artistService.importCsv(file.buffer);
+}
+
+
   @Post()
   @Roles('artist_manager')
   create(@Body() createArtistDto: CreateArtistDto) {
@@ -65,19 +96,6 @@ export class ArtistController {
     return this.artistService.remove(id);
   }
 
-  @Post('import-csv')
-  @Roles('artist_manager')
-  @UseInterceptors(FileInterceptor('file', {
-    fileFilter: (_, file, cb) => {
-      if (!file.originalname.match(/\.csv$/)) {
-        return cb(new Error('Only CSV files are allowed'), false);
-      }
-      cb(null, true);
-    },
-    limits: { fileSize: 5 * 1024 * 1024 },  // 5MB max
-  }))
-  importCsv(@UploadedFile() file: Express.Multer.File) {
-    return this.artistService.importCsv(file.buffer);
-  }
+
  
 }
