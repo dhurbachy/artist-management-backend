@@ -62,13 +62,13 @@ importCsv(@UploadedFile() file: Express.Multer.File) {
 
 
   @Post()
-  @Roles('artist_manager')
+  @Roles('super_admin','artist_manager')
   create(@Body() createArtistDto: CreateArtistDto) {
     return this.artistService.create(createArtistDto);
   }
 
   @Get()
-  @Roles('super_admin', 'artist_manager')
+  @Roles('super_admin', 'artist_manager','artist')
   findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
@@ -77,20 +77,20 @@ importCsv(@UploadedFile() file: Express.Multer.File) {
   }
 
   @Get(':id')
-  @Roles('super_admin', 'artist_manager')
+  @Roles('super_admin', 'artist_manager','artist')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.artistService.findOne(id);
   }
 
   @Patch(':id')
-  @Roles('artist_manager')
+  @Roles('super_admin','artist_manager')
 
   update(@Param('id', ParseUUIDPipe) id: string, @Body() updateArtistDto: UpdateArtistDto) {
     return this.artistService.update(id, updateArtistDto);
   }
 
   @Delete(':id')
-  @Roles('artist_manager')
+  @Roles('super_admin','artist_manager')
 
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.artistService.remove(id);
