@@ -36,9 +36,9 @@ export class SongsService {
 
     const artist = await this.checkArtistExists(artistId);
     // artist role → can only add songs to their own profile
-    if (currentUser.role === 'artist' && artist.user_id !== currentUser.id) {
-      throw new ForbiddenException('You can only add songs to your own profile');
-    }
+    // if (currentUser.role === 'artist' && artist.user_id !== currentUser.id) {
+    //   throw new ForbiddenException('You can only add songs to your own profile');
+    // }
     return this.songsRepo.createSong({
       artist_id: artistId,
       ...createSongDto,
@@ -58,10 +58,10 @@ export class SongsService {
   async update(artistId: string,songId:string, updateSongDto: UpdateSongDto,currentUser:{id:string,role:string}) {
 
     const artist=await this.checkArtistExists(artistId);
-    if(currentUser.role==='artist' && artist.user_id!==currentUser.id){
-      throw new ForbiddenException('You can only update songs on your profile');
+    // if(currentUser.role==='artist' && artist.user_id!==currentUser.id){
+    //   throw new ForbiddenException('You can only update songs on your profile');
 
-    }
+    // }
     await this.checkSongBelongsToArtist(songId, artistId);
 
     const updated = await this.songsRepo.updateSong(songId, artistId, updateSongDto);
@@ -71,9 +71,9 @@ export class SongsService {
 
   async remove(artistId: string,songId:string,currentUser:{id:string,role:string}) {
     const artist =await this.checkArtistExists(artistId);
-    if (currentUser.role === 'artist' && artist.user_id !== currentUser.id) {
-      throw new ForbiddenException('You can only delete songs on your own profile');
-    }
+    // if (currentUser.role === 'artist' && artist.user_id !== currentUser.id) {
+    //   throw new ForbiddenException('You can only delete songs on your own profile');
+    // }
      await this.checkSongBelongsToArtist(songId, artistId);
     return this.songsRepo.deleteSong(songId, artistId);
 
